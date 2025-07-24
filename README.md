@@ -6,13 +6,12 @@
 smart-talent-profile-builder/
 │
 ├── backend/
-│   ├── main.py                    # Complete FastAPI application (from artifact 1)
-│   ├── requirements.txt           # Python dependencies (from artifact 3)
-│   ├── test_api.py               # API test script (from artifact 5)
-│   ├── .env                      # Environment variables (you create this)
-│   └── talent_profiles.db        # SQLite database (auto-created when you run)
+│   ├── main.py                    # Complete FastAPI application 
+│   ├── requirements.txt           # Python dependencies 
+│   ├── test_api.py               # API test script 
+│   └── talent_profiles.db        # SQLite database 
 │
-└── README.md                    # Documentation (from artifact 4)
+└── README.md                    # Documentation 
 ```
 
 

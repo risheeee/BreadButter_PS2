@@ -89,8 +89,8 @@ init_database()
 # Pydantic models
 class ProfileImportRequest(BaseModel):
     user_id: str
-    sources: List[str]  # URLs or source identifiers
-    source_types: List[str]  # instagram, linkedin, website, gdrive, resume
+    sources: List[str]  
+    source_types: List[str]  
 
 class ProfileResponse(BaseModel):
     user_id: str
@@ -125,7 +125,6 @@ class AIService:
             
             response = self.model.generate_content([prompt, image])
             
-            # Parse JSON response
             try:
                 return json.loads(response.text)
             except:
@@ -183,7 +182,6 @@ class AIService:
                 skills = json.loads(response.text)
                 return skills if isinstance(skills, list) else []
             except:
-                # Fallback: extract skills from text response
                 return [skill.strip() for skill in response.text.split(',') if skill.strip()]
         except Exception as e:
             logger.error(f"Skill extraction error: {e}")
@@ -254,7 +252,7 @@ class WebsiteScraper:
                             "title": self._extract_title(content),
                             "description": self._extract_description(content),
                             "images": self._extract_images(content, url),
-                            "content": content[:1000]  # First 1000 chars
+                            "content": content[:1000]  
                         }
         except Exception as e:
             logger.error(f"Website scraping error: {e}")
@@ -271,10 +269,9 @@ class WebsiteScraper:
     
     def _extract_images(self, html: str, base_url: str) -> List[str]:
         images = re.findall(r'<img[^>]+src="([^"]+)"', html, re.IGNORECASE)
-        # Convert relative URLs to absolute
         base_domain = urlparse(base_url).netloc
         absolute_images = []
-        for img in images[:10]:  # Limit to first 10 images
+        for img in images[:10]:  
             if img.startswith('http'):
                 absolute_images.append(img)
             elif img.startswith('/'):
@@ -301,8 +298,7 @@ class ProfileBuilderService:
             "social_links": {},
             "portfolio_items": []
         }
-        
-        # Process each source
+
         for source, source_type in zip(request.sources, request.source_types):
             try:
                 if source_type == "instagram":
@@ -339,8 +335,7 @@ class ProfileBuilderService:
             profile_data["name"] = data.get("name", "").replace("@", "")
         
         profile_data["social_links"]["instagram"] = source
-        
-        # Extract skills from bio and captions
+
         bio_text = data.get("bio", "")
         captions = " ".join([post.get("caption", "") for post in data.get("recent_posts", [])])
         combined_text = f"{bio_text} {captions}"
@@ -393,13 +388,11 @@ class ProfileBuilderService:
         if "error" not in data:
             profile_data["social_links"]["website"] = source
             
-            # Extract skills from website content
             content = data.get("content", "")
             if content:
                 skills = await self.ai_service.extract_skills(content)
                 profile_data["skills"].extend(skills)
-            
-            # Process images as portfolio items
+
             for img_url in data.get("images", []):
                 portfolio_item = {
                     "title": "Website Image",
@@ -413,7 +406,6 @@ class ProfileBuilderService:
     
     async def _process_resume_data(self, profile_data: Dict, file_path: str):
         """Process resume file (mock implementation)"""
-        # In real implementation, extract text from PDF/DOC files
         mock_resume_text = """
         John Doe - Creative Director & Photographer
         Email: john@example.com
@@ -441,14 +433,11 @@ class ProfileBuilderService:
     
     async def _enhance_with_ai(self, profile_data: Dict):
         """Enhance profile with AI-generated content"""
-        # Remove duplicates from skills
         profile_data["skills"] = list(set(profile_data["skills"]))
-        
-        # Generate bio if not exists
+
         if not profile_data["bio"] and profile_data["skills"]:
             profile_data["bio"] = await self.ai_service.generate_bio(profile_data)
-        
-        # Analyze portfolio images
+
         for item in profile_data["portfolio_items"]:
             if item["media_type"] == "image" and item["media_url"]:
                 try:
@@ -473,8 +462,6 @@ class ProfileBuilderService:
         """Save profile to database"""
         conn = sqlite3.connect('talent_profiles.db')
         cursor = conn.cursor()
-        
-        # Insert or update profile
         cursor.execute('''
             INSERT OR REPLACE INTO profiles 
             (user_id, name, bio, email, phone, location, profession, skills, social_links, updated_at)
@@ -599,7 +586,7 @@ async def list_profiles():
             "user_id": row[0],
             "name": row[1],
             "profession": row[2],
-            "skills": json.loads(row[3] or "[]")[:5],  # First 5 skills
+            "skills": json.loads(row[3] or "[]")[:5],  
             "created_at": row[4]
         }
         for row in rows
